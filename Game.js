@@ -46,7 +46,7 @@ PhaserQuest.Game.prototype = {
 
 
         this.player.body.bounce.y = 0.2;
-        this.player.body.gravity.y = 800;
+        // this.player.body.gravity.y = 800;
         this.player.body.collideWorldBounds = true;
         this.player.anchor.setTo(0.5);
         this.player.scale.x = 0.9;
@@ -75,42 +75,47 @@ PhaserQuest.Game.prototype = {
         this.physics.arcade.collide(this.player, this.layer);
         var player = this.player;
         // reset velocity
-        player.body.velocity.x = 0;
+        // player.body.velocity.x = 0;
 
-        // input controls
-        if (cursors.left.isDown )
-        {
-            //  Move to the left
-            player.body.velocity.x = -300;
-            if (!cursors.up.isDown && player.body.onFloor())
-                player.animations.play('move');
-            player.scale.x = -0.9;
-        }
-        else if (cursors.right.isDown )
-        {
-            //  Move to the right
-            player.body.velocity.x = 300;
-            if (!cursors.up.isDown && player.body.onFloor())
-                player.animations.play('move');
-            player.scale.x = 0.9;
-        }
-        else if (player.body.onFloor())
-        {
-            //  Stand still
-            player.animations.stop();
+        // // input controls
+        // if (cursors.left.isDown )
+        // {
+        //     //  Move to the left
+        //     player.body.velocity.x = -300;
+        //     if (!cursors.up.isDown && player.body.onFloor())
+        //         player.animations.play('move');
+        //     player.scale.x = -0.9;
+        // }
+        // else if (cursors.right.isDown )
+        // {
+        //     //  Move to the right
+        //     player.body.velocity.x = 300;
+        //     if (!cursors.up.isDown && player.body.onFloor())
+        //         player.animations.play('move');
+        //     player.scale.x = 0.9;
+        // }
+        // else if (player.body.onFloor())
+        // {
+        //     //  Stand still
+        //     player.animations.stop();
 
-            player.frame = 4;
-        }
+        //     player.frame = 4;
+        // }
 
-        //  Allow the player to jump if they are touching the ground.
-        if (cursors.up.isDown)
-        {
-            player.animations.play('jump');
-            if (player.body.onFloor())
-                player.body.velocity.y = -500;
-        }
+        // //  Allow the player to jump if they are touching the ground.
+        // if (cursors.up.isDown)
+        // {
+        //     player.animations.play('jump');
+        //     if (player.body.onFloor())
+        //         player.body.velocity.y = -500;
+        // }
 
+        this.input.onDown.add(this.move, this);
 
+    },
+
+    move: function(){
+        this.player.rotation = this.physics.arcade.moveToPointer(this.player, 60, this.input.activePointer, 1000);
     },
 
     quitGame: function (pointer) {
