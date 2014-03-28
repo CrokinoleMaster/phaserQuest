@@ -45,18 +45,19 @@ PhaserQuest.Game.prototype = {
         this.physics.arcade.enable(this.player);
 
 
-        this.player.body.bounce.y = 0.2;
+        this.player.body.bounce.set(0.6, 0.6);
         // this.player.body.gravity.y = 800;
         this.player.body.collideWorldBounds = true;
-        this.player.anchor.setTo(0.5);
+        this.player.anchor.setTo(0.5, 0.5);
         this.player.scale.x = 0.9;
         this.player.scale.y = 0.9;
+        this.player.body.allowRotation = false;
 
         this.camera.follow(this.player);
         this.player.animations.add('move', [0, 1, 2, 3], 10, true);
         this.player.animations.add('jump', [13], 10, true);
 
-        cursors = this.input.keyboard.createCursorKeys();
+        // cursors = this.input.keyboard.createCursorKeys();
 
         // add map
         this.map = this.add.tilemap('level1');
@@ -73,7 +74,7 @@ PhaserQuest.Game.prototype = {
 
     update: function () {
         this.physics.arcade.collide(this.player, this.layer);
-        var player = this.player;
+        // var player = this.player;
         // reset velocity
         // player.body.velocity.x = 0;
 
@@ -115,7 +116,8 @@ PhaserQuest.Game.prototype = {
     },
 
     move: function(){
-        this.player.rotation = this.physics.arcade.moveToPointer(this.player, 60, this.input.activePointer, 1000);
+        // this.player.rotation = this.physics.arcade.moveToPointer(this.player, 2, this.input.activePointer, 5000);
+        this.player.rotation = this.physics.arcade.accelerateToPointer(this.player, this.input.activePointer, 100, 200, 200);
     },
 
     quitGame: function (pointer) {
