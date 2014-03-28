@@ -38,7 +38,7 @@ PhaserQuest.Game.prototype = {
         this.physics.startSystem(Phaser.Physics.ARCADE);
 
         // bg color
-        this.stage.backgroundColor = '#2d2d2d';
+        this.stage.backgroundColor = '#d0f4f7';
 
         // add player and cursor
         this.player = this.add.sprite(32, this.world.height - 500, 'player');
@@ -49,11 +49,11 @@ PhaserQuest.Game.prototype = {
         this.player.body.gravity.y = 800;
         this.player.body.collideWorldBounds = true;
         this.player.anchor.setTo(0.5);
-        this.player.scale.x = 0.95;
+        this.player.scale.x = 0.9;
+        this.player.scale.y = 0.9;
 
         this.camera.follow(this.player);
-        this.player.animations.add('left', [0, 1, 2, 3], 10, true);
-        this.player.animations.add('right', [5, 6, 7, 8], 10, true);
+        this.player.animations.add('move', [0, 1, 2, 3], 10, true);
         this.player.animations.add('jump', [13], 10, true);
 
         cursors = this.input.keyboard.createCursorKeys();
@@ -83,18 +83,18 @@ PhaserQuest.Game.prototype = {
             //  Move to the left
             player.body.velocity.x = -300;
             if (!cursors.up.isDown && player.body.onFloor())
-                player.animations.play('left');
-            player.scale.x = -0.95;
+                player.animations.play('move');
+            player.scale.x = -0.9;
         }
         else if (cursors.right.isDown )
         {
             //  Move to the right
             player.body.velocity.x = 300;
             if (!cursors.up.isDown && player.body.onFloor())
-                player.animations.play('right');
-            player.scale.x = 0.95;
+                player.animations.play('move');
+            player.scale.x = 0.9;
         }
-        else
+        else if (player.body.onFloor())
         {
             //  Stand still
             player.animations.stop();
