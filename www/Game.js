@@ -41,22 +41,22 @@ PhaserQuest.Game.prototype = {
         this.stage.backgroundColor = '#d0f4f7';
 
         // add player and cursor
-        this.player = this.add.sprite(32, this.world.height - 500, 'player');
+        this.player = this.add.sprite(32, this.world.height - 500, 'player', 2);
         this.physics.arcade.enable(this.player);
 
 
-        this.player.body.bounce.y = 0.2;
-        this.player.body.gravity.y = 800;
-        this.player.body.collideWorldBounds = true;
-        this.player.anchor.setTo(0.5);
+        this.player.body.bounce.set(0.5, 0.5);
+        // this.player.body.gravity.y = 800;
+        this.player.anchor.setTo(0.5, 0.5);
         this.player.scale.x = 0.9;
         this.player.scale.y = 0.9;
+        this.player.body.allowRotation = false;
 
         this.camera.follow(this.player);
-        this.player.animations.add('move', [0, 1, 2, 3], 10, true);
-        this.player.animations.add('jump', [13], 10, true);
+        this.player.animations.add('collide', [2, 6, 6,6,6, 2], 3, false);
+        this.player.animations.add('boost', [2, 13, 13, 13, 13, 2], 3, false);
 
-        cursors = this.input.keyboard.createCursorKeys();
+        // cursors = this.input.keyboard.createCursorKeys();
 
         // add map
         this.map = this.add.tilemap('level1');
@@ -72,45 +72,62 @@ PhaserQuest.Game.prototype = {
     },
 
     update: function () {
-        this.physics.arcade.collide(this.player, this.layer);
-        var player = this.player;
+        var game = this;
+        this.physics.arcade.collide(this.player, this.layer, function(){
+            if (game.player.body.blocked.up || game.player.body.blocked.down)
+                game.player.body.acceleration.y*=-1;
+            if (game.player.body.blocked.left || game.player.body.blocked.right)
+                game.player.body.acceleration.x*=-1;
+            game.player.animations.play('collide');
+        });
+
+        this.player.rotation = this.physics.arcade.angleToPointer(this.player);
+
+
+        // var player = this.player;
         // reset velocity
-        player.body.velocity.x = 0;
+        // player.body.velocity.x = 0;
 
-        // input controls
-        if (cursors.left.isDown )
-        {
-            //  Move to the left
-            player.body.velocity.x = -300;
-            if (!cursors.up.isDown && player.body.onFloor())
-                player.animations.play('move');
-            player.scale.x = -0.9;
-        }
-        else if (cursors.right.isDown )
-        {
-            //  Move to the right
-            player.body.velocity.x = 300;
-            if (!cursors.up.isDown && player.body.onFloor())
-                player.animations.play('move');
-            player.scale.x = 0.9;
-        }
-        else if (player.body.onFloor())
-        {
-            //  Stand still
-            player.animations.stop();
+        // // input controls
+        // if (cursors.left.isDown )
+        // {
+        //     //  Move to the left
+        //     player.body.velocity.x = -300;
+        //     if (!cursors.up.isDown && player.body.onFloor())
+        //         player.animations.play('move');
+        //     player.scale.x = -0.9;
+        // }
+        // else if (cursors.right.isDown )
+        // {
+        //     //  Move to the right
+        //     player.body.velocity.x = 300;
+        //     if (!cursors.up.isDown && player.body.onFloor())
+        //         player.animations.play('move');
+        //     player.scale.x = 0.9;
+        // }
+        // else if (player.body.onFloor())
+        // {
+        //     //  Stand still
+        //     player.animations.stop();
 
-            player.frame = 4;
-        }
+        //     player.frame = 4;
+        // }
 
-        //  Allow the player to jump if they are touching the ground.
-        if (cursors.up.isDown)
-        {
-            player.animations.play('jump');
-            if (player.body.onFloor())
-                player.body.velocity.y = -500;
-        }
+        // //  Allow the player to jump if they are touching the ground.
+        // if (cursors.up.isDown)
+        // {
+        //     player.animations.play('jump');
+        //     if (player.body.onFloor())
+        //         player.body.velocity.y = -500;
+        // }
 
+        this.input.onDown.add(this.move, this);
 
+    },
+
+    move: function(){
+        this.player.animations.play('boost');
+        this.physics.arcade.accelerateToPointer(this.player, this.input.activePointer, 100, 200, 200);
     },
 
     quitGame: function (pointer) {
