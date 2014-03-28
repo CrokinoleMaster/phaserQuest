@@ -25,6 +25,7 @@ PhaserQuest.Boot.prototype = {
 
         // //  Phaser will automatically pause if the browser tab the game is in loses focus. You can disable that here:
         // this.stage.disableVisibilityChange = true;
+        Phaser.Canvas.setSmoothingEnabled(this.game.context, false);
 
         if (this.game.device.desktop)
         {
