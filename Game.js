@@ -26,13 +26,13 @@ PhaserQuest.Game = function (game) {
     this.map;
     this.layer;
     this.tiles;
+    this.obstacles;
 };
 
 PhaserQuest.Game.prototype = {
 
     create: function () {
 
-        //  Honestly, just about anything could go here. It's YOUR game after all. Eat your heart out!
         console.log("game started");
         // setup physics
         this.physics.startSystem(Phaser.Physics.ARCADE);
@@ -72,9 +72,39 @@ PhaserQuest.Game.prototype = {
 
         this.input.onUp.add(this.stop, this);
         this.player.spinning = false;
+
+        // add obstacles
+        this.obstacles = this.game.add.group();
+        this.obstacles.enableBody = true;
+        this.obstacles.physicsBodyType = Phaser.Physics.ARCADE;
+        this.addObstacle(400,500, 'obstacleBeam', 2);
+        this.addObstacle(600, 200, 'obstacleBeam', 1);
+        this.addObstacle(600, 400, 'obstacleBeam', 1);
+        this.addObstacle(800,500, 'obstacleBeam', 1);
+        this.addObstacle(900, 200, 'obstacleBeam', 2);
+        this.addObstacle(1000, 400, 'obstacleBeam', 2);
     },
 
     update: function () {
+        this.collidePlayerAndTiles();
+        this.collidePlayerAndObstacles();
+
+
+
+        if (this.input.mousePointer.isDown){
+            this.move();
+        }
+
+        // move obstacle
+        this.moveObstacle(this.obstacles.getAt(0), 200, 200);
+        this.moveObstacle(this.obstacles.getAt(1), -100, 200);
+        this.moveObstacle(this.obstacles.getAt(2), -100, 200);
+        this.moveObstacle(this.obstacles.getAt(3), 200, 200);
+        this.moveObstacle(this.obstacles.getAt(4), 100, 200);
+        this.moveObstacle(this.obstacles.getAt(5), -100, 200);
+    },
+
+    collidePlayerAndTiles: function(){
         var game = this;
         this.physics.arcade.collide(this.player, this.layer, function(){
             if (game.player.body.blocked.up || game.player.body.blocked.down)
@@ -92,11 +122,13 @@ PhaserQuest.Game.prototype = {
         if (this.player.spinning == false){
             this.player.rotation = this.physics.arcade.angleToPointer(this.player);
         }
+    },
 
-        if (this.input.mousePointer.isDown){
-            this.move();
-        }
-
+    collidePlayerAndObstacles: function(){
+        var game = this;
+        this.physics.arcade.collide(this.player, this.obstacles, function(){
+            // implement callback
+        });
     },
 
     move: function(){
@@ -108,6 +140,29 @@ PhaserQuest.Game.prototype = {
         this.player.animations.play('float');
         this.player.body.acceleration.x= 0;
         this.player.body.acceleration.y= 0;
+    },
+
+    addObstacle: function(x, y, image, scale){
+        var obstacle = this.add.sprite(x,y, image);
+        this.obstacles.add(obstacle);
+        obstacle.oX = obstacle.body.x;
+        obstacle.oY = obstacle.body.y;
+        obstacle.scale.y = scale;
+        obstacle.body.immovable = true;
+    },
+
+    moveObstacle: function(obstacle, y, speed){
+        var x = obstacle.body.x;
+
+        if (obstacle.body.y>obstacle.oY-y){
+            console.log("-");
+            this.physics.arcade.accelerateToXY(obstacle, x, obstacle.body.y-100, speed, 500, 500);
+        }
+        else if (obstacle.body.y<=obstacle.oY-y){
+            console.log("+");
+            this.physics.arcade.accelerateToXY(obstacle, x, obstacle.body.y+100, speed, 500, 500);
+        }
+
     },
 
     quitGame: function (pointer) {
