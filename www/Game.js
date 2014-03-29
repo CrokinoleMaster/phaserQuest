@@ -50,7 +50,6 @@ PhaserQuest.Game.prototype = {
         this.player.anchor.setTo(0.5, 0.5);
         this.player.scale.x = 0.9;
         this.player.scale.y = 0.9;
-        this.player.body.allowRotation = false;
 
         this.camera.follow(this.player);
         this.player.animations.add('float', [2],1,false);
@@ -72,6 +71,7 @@ PhaserQuest.Game.prototype = {
         this.player.animations.stop();
 
         this.input.onUp.add(this.stop, this);
+        this.player.spinning = false;
     },
 
     update: function () {
@@ -82,10 +82,16 @@ PhaserQuest.Game.prototype = {
             if (game.player.body.blocked.left || game.player.body.blocked.right)
                 game.player.body.acceleration.x*=-1;
             game.player.animations.play('collide');
+            game.player.spinning = true;
+            game.player.body.angularVelocity = 100;
+            game.time.events.add(Phaser.Timer.SECOND * 4, function(){
+                game.player.spinning = false;
+            }, game);
         });
 
-        this.player.rotation = this.physics.arcade.angleToPointer(this.player);
-
+        if (this.player.spinning == false){
+            this.player.rotation = this.physics.arcade.angleToPointer(this.player);
+        }
 
         if (this.input.mousePointer.isDown){
             this.move();
@@ -95,7 +101,7 @@ PhaserQuest.Game.prototype = {
 
     move: function(){
         this.player.animations.play('boost');
-        this.physics.arcade.accelerateToPointer(this.player, this.input.activePointer, 2000, 1000, 1000);
+        this.physics.arcade.accelerateToPointer(this.player, this.input.activePointer, 300, 600, 600);
     },
 
     stop: function(){
