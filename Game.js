@@ -77,12 +77,12 @@ PhaserQuest.Game.prototype = {
         this.obstacles = this.game.add.group();
         this.obstacles.enableBody = true;
         this.obstacles.physicsBodyType = Phaser.Physics.ARCADE;
-        this.addObstacle(400,500, 'obstacleBeam', 2);
-        this.addObstacle(600, 200, 'obstacleBeam', 1);
-        this.addObstacle(600, 400, 'obstacleBeam', 1);
-        this.addObstacle(800,500, 'obstacleBeam', 1);
-        this.addObstacle(900, 200, 'obstacleBeam', 2);
-        this.addObstacle(1000, 400, 'obstacleBeam', 2);
+        this.addObstacle(400,700, 'obstacleBeam', 2);
+        this.addObstacle(600, 250, 'obstacleBeam', 1);
+        this.addObstacle(600, 800, 'obstacleBeam', 1);
+        this.addObstacle(800,600, 'obstacleBeam', 1);
+        this.addObstacle(900, 500, 'obstacleBeam', 2);
+        this.addObstacle(1000, 300, 'obstacleBeam', 2);
     },
 
     update: function () {
