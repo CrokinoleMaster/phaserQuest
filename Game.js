@@ -45,7 +45,7 @@ PhaserQuest.Game.prototype = {
         this.physics.arcade.enable(this.player);
 
 
-        this.player.body.bounce.set(0.5, 0.5);
+        this.player.body.bounce.set(0.8, 0.8);
         // this.player.body.gravity.y = 800;
         this.player.anchor.setTo(0.5, 0.5);
         this.player.scale.x = 0.9;
@@ -107,10 +107,6 @@ PhaserQuest.Game.prototype = {
     collidePlayerAndTiles: function(){
         var game = this;
         this.physics.arcade.collide(this.player, this.layer, function(){
-            if (game.player.body.blocked.up || game.player.body.blocked.down)
-                game.player.body.acceleration.y*=-1;
-            if (game.player.body.blocked.left || game.player.body.blocked.right)
-                game.player.body.acceleration.x*=-1;
             game.player.animations.play('collide');
             game.player.spinning = true;
             game.player.body.angularVelocity = 100;
@@ -121,6 +117,7 @@ PhaserQuest.Game.prototype = {
 
         if (this.player.spinning == false){
             this.player.rotation = this.physics.arcade.angleToPointer(this.player);
+            this.player.animations.play('float');
         }
     },
 
