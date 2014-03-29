@@ -86,8 +86,8 @@ PhaserQuest.Game.prototype = {
     },
 
     update: function () {
-        this.collidePlayerAndTiles();
-        this.collidePlayerAndObstacles();
+        this.collidePlayer(this.layer);
+        this.collidePlayer(this.obstacles);
 
 
 
@@ -104,9 +104,11 @@ PhaserQuest.Game.prototype = {
         this.moveObstacle(this.obstacles.getAt(5), -100, 200);
     },
 
-    collidePlayerAndTiles: function(){
+    collidePlayer: function(target, callback){
         var game = this;
-        this.physics.arcade.collide(this.player, this.layer, function(){
+        this.physics.arcade.collide(this.player, target, function(){
+            if (callback)
+                callback();
             game.player.animations.play('collide');
             game.player.spinning = true;
             game.player.body.angularVelocity = 100;
@@ -119,13 +121,6 @@ PhaserQuest.Game.prototype = {
             this.player.rotation = this.physics.arcade.angleToPointer(this.player);
             this.player.animations.play('float');
         }
-    },
-
-    collidePlayerAndObstacles: function(){
-        var game = this;
-        this.physics.arcade.collide(this.player, this.obstacles, function(){
-            // implement callback
-        });
     },
 
     move: function(){
@@ -152,11 +147,9 @@ PhaserQuest.Game.prototype = {
         var x = obstacle.body.x;
 
         if (obstacle.body.y>obstacle.oY-y){
-            console.log("-");
             this.physics.arcade.accelerateToXY(obstacle, x, obstacle.body.y-100, speed, 500, 500);
         }
         else if (obstacle.body.y<=obstacle.oY-y){
-            console.log("+");
             this.physics.arcade.accelerateToXY(obstacle, x, obstacle.body.y+100, speed, 500, 500);
         }
 
