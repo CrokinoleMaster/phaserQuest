@@ -53,10 +53,11 @@ PhaserQuest.Game.prototype = {
         this.player.body.allowRotation = false;
 
         this.camera.follow(this.player);
-        this.player.animations.add('collide', [2, 6, 6,6,6, 2], 3, false);
-        this.player.animations.add('boost', [2, 13, 13, 13, 13, 2], 3, false);
+        this.player.animations.add('float', [2],1,false);
+        this.player.animations.add('collide', [6,6,6,6,6,6,6,6,6,6,6,6,6,6], 15, false);
+        this.player.animations.add('boost', [13], 15, true);
+        this.player.animations.play('float');
 
-        // cursors = this.input.keyboard.createCursorKeys();
 
         // add map
         this.map = this.add.tilemap('level1');
@@ -68,7 +69,9 @@ PhaserQuest.Game.prototype = {
         this.layer.resizeWorld();
 
 
+        this.player.animations.stop();
 
+        this.input.onUp.add(this.stop, this);
     },
 
     update: function () {
@@ -84,50 +87,21 @@ PhaserQuest.Game.prototype = {
         this.player.rotation = this.physics.arcade.angleToPointer(this.player);
 
 
-        // var player = this.player;
-        // reset velocity
-        // player.body.velocity.x = 0;
-
-        // // input controls
-        // if (cursors.left.isDown )
-        // {
-        //     //  Move to the left
-        //     player.body.velocity.x = -300;
-        //     if (!cursors.up.isDown && player.body.onFloor())
-        //         player.animations.play('move');
-        //     player.scale.x = -0.9;
-        // }
-        // else if (cursors.right.isDown )
-        // {
-        //     //  Move to the right
-        //     player.body.velocity.x = 300;
-        //     if (!cursors.up.isDown && player.body.onFloor())
-        //         player.animations.play('move');
-        //     player.scale.x = 0.9;
-        // }
-        // else if (player.body.onFloor())
-        // {
-        //     //  Stand still
-        //     player.animations.stop();
-
-        //     player.frame = 4;
-        // }
-
-        // //  Allow the player to jump if they are touching the ground.
-        // if (cursors.up.isDown)
-        // {
-        //     player.animations.play('jump');
-        //     if (player.body.onFloor())
-        //         player.body.velocity.y = -500;
-        // }
-
-        this.input.onDown.add(this.move, this);
+        if (this.input.mousePointer.isDown){
+            this.move();
+        }
 
     },
 
     move: function(){
         this.player.animations.play('boost');
-        this.physics.arcade.accelerateToPointer(this.player, this.input.activePointer, 100, 200, 200);
+        this.physics.arcade.accelerateToPointer(this.player, this.input.activePointer, 2000, 1000, 1000);
+    },
+
+    stop: function(){
+        this.player.animations.play('float');
+        this.player.body.acceleration.x= 0;
+        this.player.body.acceleration.y= 0;
     },
 
     quitGame: function (pointer) {
