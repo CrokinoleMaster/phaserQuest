@@ -33,6 +33,7 @@ PhaserQuest.Preloader.prototype = {
         this.load.tilemap('level1', 'assets/tiles/level1.json', null, Phaser.Tilemap.TILED_JSON);
         this.load.image('baseTiles', 'assets/tiles/level1.png');
         this.load.image('obstacleBeam', 'assets/sprites/obstacleBeam.png');
+        this.load.image('okayButton', 'assets/sprites/okayButton.png');
     },
 
     create: function () {
