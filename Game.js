@@ -236,6 +236,7 @@ PhaserQuest.Game.prototype = {
             game.heartSprites = game.add.group();
             for (i=0; i< game.playerHealth; i++){
                 var heart = game.add.sprite(200+i*50, game.camera.height-100, 'heartFull');
+                heart.fixedToCamera = true;
                 game.heartSprites.add(heart);
             }
         }
