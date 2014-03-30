@@ -34,6 +34,7 @@ PhaserQuest.Preloader.prototype = {
         this.load.image('baseTiles', 'assets/tiles/level1.png');
         this.load.image('obstacleBeam', 'assets/sprites/obstacleBeam.png');
         this.load.image('okayButton', 'assets/sprites/okayButton.png');
+        this.load.image('heartFull', 'assets/sprites/heartFull.png');
     },
 
     create: function () {

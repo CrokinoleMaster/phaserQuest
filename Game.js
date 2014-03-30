@@ -35,6 +35,8 @@ PhaserQuest.Game.prototype = {
 
     deathScreen: {},
 
+    heartSprites: null,
+
     playerHealth: 5,
 
     paused: false,
@@ -90,6 +92,8 @@ PhaserQuest.Game.prototype = {
         this.addObstacle(800,600, 'obstacleBeam', 1);
         this.addObstacle(900, 500, 'obstacleBeam', 2);
         this.addObstacle(1000, 300, 'obstacleBeam', 2);
+
+        this.renderHUD(this);
     },
 
     update: function () {
@@ -102,6 +106,7 @@ PhaserQuest.Game.prototype = {
         this.collidePlayer(this.layer);
         this.collidePlayer(this.obstacles, function(){
             game.player.damage(1);
+            game.renderHUD(game);
         });
 
 
@@ -117,6 +122,7 @@ PhaserQuest.Game.prototype = {
         this.moveObstacle(this.obstacles.getAt(3), 200, 200);
         this.moveObstacle(this.obstacles.getAt(4), 100, 200);
         this.moveObstacle(this.obstacles.getAt(5), -100, 200);
+
     },
 
     initializePlayer: function(){
@@ -180,7 +186,6 @@ PhaserQuest.Game.prototype = {
         else if (obstacle.body.y<=obstacle.oY-y){
             this.physics.arcade.accelerateToXY(obstacle, x, obstacle.body.y+100, speed, 500, 500);
         }
-
     },
 
     renderDeathScreen: function(game){
@@ -192,7 +197,7 @@ PhaserQuest.Game.prototype = {
 
         game.deathScreen.text = game.add.text(game.camera.width/2, 500, 'You Died!',
             {fill: 'blue', align: "center"});
-        game.deathScreen.text.font = 'Arial Black';
+        game.deathScreen.text.font = 'Arial';
         game.deathScreen.text.fontSize = 100;
         game.deathScreen.text.anchor.set(0.5);
 
@@ -202,6 +207,38 @@ PhaserQuest.Game.prototype = {
             game.deathScreen.button.destroy();
             game.paused = false;
         });
+        game.deathScreen.button.scale.setTo(2,2);
+    },
+
+    renderHUD: function(game){
+        // var lives = game.add.text(50, game.camera.height-100, 'LIVES:',
+        //     {fill: 'blue'});
+        // lives.font = 'Arial';
+        // lives.fontSize = 30;
+        game.renderHearts(game);
+    },
+
+    renderHearts: function(game){
+        var i;
+        var j;
+        if (game.heartSprites === null){
+            game.heartSprites = game.add.group();
+            for (i=0; i< game.playerHealth; i++){
+                var heart = game.add.sprite(200+i*50, game.camera.height-100, 'heartFull');
+                game.heartSprites.add(heart);
+            }
+        }
+        else {
+            game.heartSprites.forEach(function(heart){
+                if (this.getIndex(heart) < game.player.health){
+                    heart.revive();
+                }
+                else {
+                    heart.kill();
+                }
+            }, game.heartSprites);
+        }
+
     },
 
     quitGame: function (pointer) {
