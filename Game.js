@@ -33,11 +33,13 @@ PhaserQuest.Game.prototype = {
 
     collideEvents: [],
 
+    hitEvents: [],
+
     deathScreen: {},
 
     heartSprites: null,
 
-    playerHealth: 5,
+    playerHealth: 10,
 
     paused: false,
 
@@ -81,6 +83,7 @@ PhaserQuest.Game.prototype = {
 
         this.input.onUp.add(this.stop, this);
         this.player.spinning = false;
+        this.player.hit = false;
 
         // add obstacles
         this.obstacles = this.game.add.group();
@@ -135,14 +138,21 @@ PhaserQuest.Game.prototype = {
     collidePlayer: function(target, callback){
         var game = this;
         this.physics.arcade.collide(this.player, target, function(){
-            if (callback)
+            if (callback && game.player.hit ===false)
                 callback();
             game.player.animations.play('collide');
             game.player.body.angularVelocity = 100;
             game.player.spinning = true;
+            game.player.hit = true;
+
             game.removeArrayEvents(game.collideEvents);
+            game.removeArrayEvents(game.hitEvents);
             game.collideEvents.push(game.time.events.add(Phaser.Timer.SECOND * 4, function(){
                 game.player.spinning = false;
+            }, game) );
+            game.hitEvents.push(game.time.events.add(Phaser.Timer.SECOND/10, function(){
+                console.log("hit false");
+                this.player.hit = false;
             }, game) );
         });
 
