@@ -102,6 +102,7 @@ PhaserQuest.Game.prototype = {
             this.renderDeathScreen(this);
             this.player.reset(32, this.camera.height - 500);
             this.player.health = this.playerHealth;
+            this.renderHUD(this);
         }
         this.collidePlayer(this.layer);
         this.collidePlayer(this.obstacles, function(){
