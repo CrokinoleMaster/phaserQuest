@@ -31,6 +31,8 @@ PhaserQuest.Game = function (game) {
 
 PhaserQuest.Game.prototype = {
 
+    collideEvents: [],
+
     create: function () {
 
         console.log("game started");
@@ -79,7 +81,7 @@ PhaserQuest.Game.prototype = {
         this.obstacles.physicsBodyType = Phaser.Physics.ARCADE;
         this.addObstacle(400,700, 'obstacleBeam', 2);
         this.addObstacle(600, 250, 'obstacleBeam', 1);
-        this.addObstacle(600, 800, 'obstacleBeam', 1);
+        this.addObstacle(600, 700, 'obstacleBeam', 1);
         this.addObstacle(800,600, 'obstacleBeam', 1);
         this.addObstacle(900, 500, 'obstacleBeam', 2);
         this.addObstacle(1000, 300, 'obstacleBeam', 2);
@@ -91,7 +93,7 @@ PhaserQuest.Game.prototype = {
 
 
 
-        if (this.input.mousePointer.isDown){
+        if (this.input.activePointer.isDown){
             this.move();
         }
 
@@ -110,17 +112,24 @@ PhaserQuest.Game.prototype = {
             if (callback)
                 callback();
             game.player.animations.play('collide');
-            game.player.spinning = true;
             game.player.body.angularVelocity = 100;
-            game.time.events.add(Phaser.Timer.SECOND * 4, function(){
+            game.player.spinning = true;
+            game.removeArrayEvents(game.collideEvents);
+            game.collideEvents.push(game.time.events.add(Phaser.Timer.SECOND * 4, function(){
                 game.player.spinning = false;
-            }, game);
+            }, game) );
         });
 
         if (this.player.spinning == false){
             this.player.rotation = this.physics.arcade.angleToPointer(this.player);
             this.player.animations.play('float');
         }
+    },
+
+    removeArrayEvents: function(eventArray){
+        eventArray.forEach(function(event){
+            this.time.events.remove(event);
+        }, this);
     },
 
     move: function(){
