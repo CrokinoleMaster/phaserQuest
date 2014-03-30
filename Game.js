@@ -33,6 +33,12 @@ PhaserQuest.Game.prototype = {
 
     collideEvents: [],
 
+    deathScreen: {},
+
+    playerHealth: 5,
+
+    paused: false,
+
     create: function () {
 
         console.log("game started");
@@ -43,8 +49,7 @@ PhaserQuest.Game.prototype = {
         this.stage.backgroundColor = '#d0f4f7';
 
         // add player and cursor
-        this.player = this.add.sprite(32, this.world.height - 500, 'player', 2);
-        this.physics.arcade.enable(this.player);
+        this.initializePlayer();
 
 
         this.player.body.bounce.set(0.8, 0.8);
@@ -88,12 +93,20 @@ PhaserQuest.Game.prototype = {
     },
 
     update: function () {
+        var game = this;
+        if (this.player.health<=0){
+            this.renderDeathScreen(this);
+            this.player.reset(32, this.camera.height - 500);
+            this.player.health = this.playerHealth;
+        }
         this.collidePlayer(this.layer);
-        this.collidePlayer(this.obstacles);
+        this.collidePlayer(this.obstacles, function(){
+            game.player.damage(1);
+        });
 
 
 
-        if (this.input.activePointer.isDown){
+        if (this.input.activePointer.isDown && this.paused === false){
             this.move();
         }
 
@@ -104,6 +117,12 @@ PhaserQuest.Game.prototype = {
         this.moveObstacle(this.obstacles.getAt(3), 200, 200);
         this.moveObstacle(this.obstacles.getAt(4), 100, 200);
         this.moveObstacle(this.obstacles.getAt(5), -100, 200);
+    },
+
+    initializePlayer: function(){
+        this.player = this.add.sprite(32, this.world.height - 500, 'player', 2);
+        this.physics.arcade.enable(this.player);
+        this.player.health = this.playerHealth;
     },
 
     collidePlayer: function(target, callback){
@@ -162,6 +181,27 @@ PhaserQuest.Game.prototype = {
             this.physics.arcade.accelerateToXY(obstacle, x, obstacle.body.y+100, speed, 500, 500);
         }
 
+    },
+
+    renderDeathScreen: function(game){
+        game.paused = true;
+
+        game.deathScreen.graphics = game.add.graphics(0,0);
+        game.deathScreen.graphics.beginFill("0xd0f4f7", 0.8);
+        game.deathScreen.graphics.drawRect(0, 0, game.camera.width, game.camera.height);
+
+        game.deathScreen.text = game.add.text(game.camera.width/2, 500, 'You Died!',
+            {fill: 'blue', align: "center"});
+        game.deathScreen.text.font = 'Arial Black';
+        game.deathScreen.text.fontSize = 100;
+        game.deathScreen.text.anchor.set(0.5);
+
+        game.deathScreen.button = game.add.button(game.camera.width/2, 800, 'okayButton', function(){
+            game.deathScreen.graphics.destroy();
+            game.deathScreen.text.destroy();
+            game.deathScreen.button.destroy();
+            game.paused = false;
+        });
     },
 
     quitGame: function (pointer) {
