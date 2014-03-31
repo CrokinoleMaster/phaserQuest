@@ -30,6 +30,7 @@ PhaserQuest.Game = function (level, game) {
     this.obstacles;
     this.createCall;
     this.updateCall;
+    this.goal;
 };
 
 PhaserQuest.Game.prototype = {
@@ -52,6 +53,7 @@ PhaserQuest.Game.prototype = {
         var game = this;
 
         console.log("game started");
+        console.log(this.level);
         // setup physics
         this.physics.startSystem(Phaser.Physics.ARCADE);
 
@@ -95,7 +97,7 @@ PhaserQuest.Game.prototype = {
 
     update: function () {
         var game = this;
-        if (this.player.health<=0){
+        if (this.player.health<=0 || !this.player.alive){
             this.renderPauseScreen(this, 'You died');
             this.player.reset(32, this.camera.height - 500);
             this.player.health = this.playerHealth;
@@ -106,7 +108,6 @@ PhaserQuest.Game.prototype = {
             game.player.damage(1);
             game.renderHUD(game);
         });
-
 
 
         if (this.input.activePointer.isDown && this.paused === false){
@@ -121,7 +122,14 @@ PhaserQuest.Game.prototype = {
     initializePlayer: function(){
         this.player = this.add.sprite(32, this.world.height - 500, 'player', 2);
         this.physics.arcade.enable(this.player);
+        this.player.checkWorldBounds=true;
+        this.player.outOfBoundsKill = true;
         this.player.health = this.playerHealth;
+    },
+
+    renderGoal: function(x, y){
+        this.goal = this.add.sprite(x, y, 'finish');
+        this.goal.anchor.setTo(0.5,0.5);
     },
 
     collidePlayer: function(target, callback){
@@ -152,7 +160,7 @@ PhaserQuest.Game.prototype = {
 
     createMap: function(level){
         this.map = this.add.tilemap(level);
-        this.map.addTilesetImage('base', level);
+        this.map.addTilesetImage('base', 'basicTiles');
         this.map.setCollisionByExclusion([], true, 'base');
 
         this.layer = this.map.createLayer('base');
@@ -175,6 +183,26 @@ PhaserQuest.Game.prototype = {
         this.player.animations.play('float');
         this.player.body.acceleration.x= 0;
         this.player.body.acceleration.y= 0;
+    },
+
+    freeze:function(){
+        var vX = this.player.body.velocity.x;
+        var vY = this.player.body.velocity.y;
+        var aX = this.player.body.acceleration.x;
+        var aY = this.player.body.acceleration.y;
+        this.player.body.velocity.x = 0;
+        this.player.body.velocity.y = 0;
+        this.player.body.acceleration.x = 0;
+        this.player.body.acceleration.y = 0;
+
+        return {vX: vX, vY: vY, aX: aX, aY: aY};
+    },
+
+    unfreeze: function(speedObj){
+        this.player.body.velocity.x = speedObj.vX;
+        this.player.body.velocity.y = speedObj.vY;
+        this.player.body.acceleration.x = speedObj.aX;
+        this.player.body.acceleration.y = speedObj.aY;
     },
 
     addObstacle: function(x, y, image, scale){
@@ -221,17 +249,19 @@ PhaserQuest.Game.prototype = {
 
     renderTipScreen: function(game, text, callback){
         game.paused = true;
-
+        var speeds = game.freeze();
         game.tipScreen.text = game.add.text(game.camera.width/2, 500, text,
             {fill: '#53BBBC', align: 'center'});
         game.tipScreen.text.font = 'Arial Black';
         game.tipScreen.text.fontSize = 50;
         game.tipScreen.text.fontWeight = 'bold';
         game.tipScreen.text.anchor.set(0.5);
+        game.tipScreen.text.fixedToCamera = true;
 
         game.input.onDown.addOnce(function(){
             game.tipScreen.text.destroy();
             game.paused = false;
+            game.unfreeze(speeds);
             if (callback)
                 callback();
         });
@@ -287,21 +317,60 @@ PhaserQuest.level1 = new PhaserQuest.Game('level1');
 
 PhaserQuest.level1.createCall = function(){
 
-    this.addObstacle(400,700, 'obstacleBeam', 2);
-    this.addObstacle(600, 250, 'obstacleBeam', 1);
-    this.addObstacle(600, 700, 'obstacleBeam', 1);
-    this.addObstacle(800,600, 'obstacleBeam', 1);
-    this.addObstacle(900, 500, 'obstacleBeam', 2);
-    this.addObstacle(1000, 300, 'obstacleBeam', 2);
+    var game = this;
 
-    this.renderTipScreen(this, 'Welcome!');
+    // this.addObstacle(400,700, 'obstacleBeam', 2);
+    // this.addObstacle(600, 250, 'obstacleBeam', 1);
+    // this.addObstacle(600, 700, 'obstacleBeam', 1);
+    // this.addObstacle(800,600, 'obstacleBeam', 1);
+    // this.addObstacle(900, 500, 'obstacleBeam', 2);
+    // this.addObstacle(1000, 300, 'obstacleBeam', 2);
+
+    this.renderGoal(1800,800);
+    this.goal.kill();
+
+    this.renderTipScreen(this, 'Welcome to zero gravity!\n'+
+        'click the screen to accelerate. \n'+
+        'try not to float off into space!', function(){
+
+            game.time.events.add(Phaser.Timer.SECOND * 3, function(){
+                        game.renderTipScreen(game, "Try holding down click to accelerate"+
+                            "continuously.\n"+
+                            "but don't go too fast!\n"+
+                            "In space, there is no air slowing you down!", function(){
+                                game.renderTipScreen(game, 'Go towards the star to complete!',
+                                    function(){
+                                        game.goal.revive();
+                                        game.player.bringToTop();
+                                    });
+                            });
+                    }, game);
+
+        });
+
+
+
 }
 
 PhaserQuest.level1.updateCall = function(){
-    this.moveObstacle(this.obstacles.getAt(0), 200, 200);
-    this.moveObstacle(this.obstacles.getAt(1), -100, 200);
-    this.moveObstacle(this.obstacles.getAt(2), -100, 200);
-    this.moveObstacle(this.obstacles.getAt(3), 200, 200);
-    this.moveObstacle(this.obstacles.getAt(4), 100, 200);
-    this.moveObstacle(this.obstacles.getAt(5), -100, 200);
+    // this.moveObstacle(this.obstacles.getAt(0), 200, 200);
+    // this.moveObstacle(this.obstacles.getAt(1), -100, 200);
+    // this.moveObstacle(this.obstacles.getAt(2), -100, 200);
+    // this.moveObstacle(this.obstacles.getAt(3), 200, 200);
+    // this.moveObstacle(this.obstacles.getAt(4), 100, 200);
+    // this.moveObstacle(this.obstacles.getAt(5), -100, 200);
+
+    if (this.player.overlap(this.goal)){
+        this.state.start('level2');
+    }
+}
+
+PhaserQuest.level2 = new PhaserQuest.Game('level2');
+
+PhaserQuest.level2.createCall = function(){
+
+}
+
+PhaserQuest.level2.updateCall = function(){
+
 }
