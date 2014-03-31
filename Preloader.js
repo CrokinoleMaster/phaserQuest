@@ -29,12 +29,22 @@ PhaserQuest.Preloader.prototype = {
         // this.load.audio('titleMusic', ['audio/main_menu.mp3']);
         // this.load.bitmapFont('caslon', 'fonts/caslon.png', 'fonts/caslon.xml');
         //  + lots of other required assets here
+
+        //player
         this.load.spritesheet('player', 'assets/sprites/player.png', 72.5, 94, 21);
+
+        //map
+        //level1
         this.load.tilemap('level1', 'assets/tiles/level1.json', null, Phaser.Tilemap.TILED_JSON);
-        this.load.image('level1', 'assets/tiles/level1.png');
+        this.load.image('basicTiles', 'assets/tiles/level1.png');
+        //level2
+        this.load.tilemap('level2', 'assets/tiles/level2.json', null, Phaser.Tilemap.TILED_JSON);
+
+        //others
         this.load.image('obstacleBeam', 'assets/sprites/obstacleBeam.png');
         this.load.image('okayButton', 'assets/sprites/okayButton.png');
         this.load.image('heartFull', 'assets/sprites/heartFull.png');
+        this.load.image('finish', 'assets/sprites/finish.png');
     },
 
     create: function () {
