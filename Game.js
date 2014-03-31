@@ -151,7 +151,6 @@ PhaserQuest.Game.prototype = {
                 game.player.spinning = false;
             }, game) );
             game.hitEvents.push(game.time.events.add(Phaser.Timer.SECOND/10, function(){
-                console.log("hit false");
                 this.player.hit = false;
             }, game) );
         });
@@ -170,7 +169,7 @@ PhaserQuest.Game.prototype = {
 
     move: function(){
         this.player.animations.play('boost');
-        this.physics.arcade.accelerateToPointer(this.player, this.input.activePointer, 300, 600, 600);
+        this.physics.arcade.accelerateToPointer(this.player, this.input.activePointer, 200, 100, 100);
     },
 
     stop: function(){
