@@ -169,7 +169,7 @@ PhaserQuest.Game.prototype = {
 
     move: function(){
         this.player.animations.play('boost');
-        this.physics.arcade.accelerateToPointer(this.player, this.input.activePointer, 100, 100, 100);
+        this.physics.arcade.accelerateToPointer(this.player, this.input.activePointer, 200, 100, 100);
     },
 
     stop: function(){
