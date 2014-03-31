@@ -34,7 +34,7 @@ PhaserQuest.MainMenu.prototype = {
         // this.music.stop();
 
         //  And start the actual game
-        this.state.start('Game');
+        this.state.start('level1');
 
     }
 

@@ -1,4 +1,4 @@
-PhaserQuest.Game = function (game) {
+PhaserQuest.Game = function (level, game) {
 
     //  When a State is added to Phaser it automatically has the following properties set on it, even if they already exist:
 
@@ -21,12 +21,15 @@ PhaserQuest.Game = function (game) {
 
     //  You can use any of these from any function within this State.
     //  But do consider them as being 'reserved words', i.e. don't create a property for your own game called "world" or you'll over-write the world reference.
+    this.level = level;
     this.player;
     this.cursors;
     this.map;
     this.layer;
     this.tiles;
     this.obstacles;
+    this.createCall;
+    this.updateCall;
 };
 
 PhaserQuest.Game.prototype = {
@@ -35,7 +38,9 @@ PhaserQuest.Game.prototype = {
 
     hitEvents: [],
 
-    deathScreen: {},
+    pauseScreen: {},
+
+    tipScreen: {},
 
     heartSprites: null,
 
@@ -44,6 +49,7 @@ PhaserQuest.Game.prototype = {
     paused: false,
 
     create: function () {
+        var game = this;
 
         console.log("game started");
         // setup physics
@@ -54,6 +60,8 @@ PhaserQuest.Game.prototype = {
 
         // add player and cursor
         this.initializePlayer();
+
+        this.createMap(this.level);
 
 
         this.player.body.bounce.set(0.8, 0.8);
@@ -67,18 +75,6 @@ PhaserQuest.Game.prototype = {
         this.player.animations.add('collide', [6,6,6,6,6,6,6,6,6,6,6,6,6,6], 15, false);
         this.player.animations.add('boost', [13], 15, true);
         this.player.animations.play('float');
-
-
-        // add map
-        this.map = this.add.tilemap('level1');
-        this.map.addTilesetImage('base', 'baseTiles');
-        this.map.setCollisionByExclusion([], true, 'base');
-
-        this.layer = this.map.createLayer('base');
-
-        this.layer.resizeWorld();
-
-
         this.player.animations.stop();
 
         this.input.onUp.add(this.stop, this);
@@ -89,20 +85,18 @@ PhaserQuest.Game.prototype = {
         this.obstacles = this.game.add.group();
         this.obstacles.enableBody = true;
         this.obstacles.physicsBodyType = Phaser.Physics.ARCADE;
-        this.addObstacle(400,700, 'obstacleBeam', 2);
-        this.addObstacle(600, 250, 'obstacleBeam', 1);
-        this.addObstacle(600, 700, 'obstacleBeam', 1);
-        this.addObstacle(800,600, 'obstacleBeam', 1);
-        this.addObstacle(900, 500, 'obstacleBeam', 2);
-        this.addObstacle(1000, 300, 'obstacleBeam', 2);
+
+
 
         this.renderHUD(this);
+
+        this.createCall();
     },
 
     update: function () {
         var game = this;
         if (this.player.health<=0){
-            this.renderDeathScreen(this);
+            this.renderPauseScreen(this, 'You died');
             this.player.reset(32, this.camera.height - 500);
             this.player.health = this.playerHealth;
             this.renderHUD(this);
@@ -120,12 +114,7 @@ PhaserQuest.Game.prototype = {
         }
 
         // move obstacle
-        this.moveObstacle(this.obstacles.getAt(0), 200, 200);
-        this.moveObstacle(this.obstacles.getAt(1), -100, 200);
-        this.moveObstacle(this.obstacles.getAt(2), -100, 200);
-        this.moveObstacle(this.obstacles.getAt(3), 200, 200);
-        this.moveObstacle(this.obstacles.getAt(4), 100, 200);
-        this.moveObstacle(this.obstacles.getAt(5), -100, 200);
+        this.updateCall();
 
     },
 
@@ -161,6 +150,16 @@ PhaserQuest.Game.prototype = {
         }
     },
 
+    createMap: function(level){
+        this.map = this.add.tilemap(level);
+        this.map.addTilesetImage('base', level);
+        this.map.setCollisionByExclusion([], true, 'base');
+
+        this.layer = this.map.createLayer('base');
+
+        this.layer.resizeWorld();
+    },
+
     removeArrayEvents: function(eventArray){
         eventArray.forEach(function(event){
             this.time.events.remove(event);
@@ -169,7 +168,7 @@ PhaserQuest.Game.prototype = {
 
     move: function(){
         this.player.animations.play('boost');
-        this.physics.arcade.accelerateToPointer(this.player, this.input.activePointer, 200, 100, 100);
+        this.physics.arcade.accelerateToPointer(this.player, this.input.activePointer, 200, 200, 200);
     },
 
     stop: function(){
@@ -198,26 +197,44 @@ PhaserQuest.Game.prototype = {
         }
     },
 
-    renderDeathScreen: function(game){
+    renderPauseScreen: function(game, text){
         game.paused = true;
 
-        game.deathScreen.graphics = game.add.graphics(0,0);
-        game.deathScreen.graphics.beginFill("0xd0f4f7", 0.8);
-        game.deathScreen.graphics.drawRect(0, 0, game.camera.width, game.camera.height);
+        game.pauseScreen.graphics = game.add.graphics(0,0);
+        game.pauseScreen.graphics.beginFill("0xffffff", 0.8);
+        game.pauseScreen.graphics.drawRect(0, 0, game.camera.width, game.camera.height);
 
-        game.deathScreen.text = game.add.text(game.camera.width/2, 500, 'You Died!',
-            {fill: 'blue', align: "center"});
-        game.deathScreen.text.font = 'Arial';
-        game.deathScreen.text.fontSize = 100;
-        game.deathScreen.text.anchor.set(0.5);
+        game.pauseScreen.text = game.add.text(game.camera.width/2, 500, text,
+            {fill: '#53BBBC', align: "center"});
+        game.pauseScreen.text.font = 'Arial';
+        game.pauseScreen.text.fontSize = 100;
+        game.pauseScreen.text.anchor.set(0.5);
 
-        game.deathScreen.button = game.add.button(game.camera.width/2, 800, 'okayButton', function(){
-            game.deathScreen.graphics.destroy();
-            game.deathScreen.text.destroy();
-            game.deathScreen.button.destroy();
+        game.pauseScreen.button = game.add.button(game.camera.width/2, 800, 'okayButton', function(){
+            game.pauseScreen.graphics.destroy();
+            game.pauseScreen.text.destroy();
+            game.pauseScreen.button.destroy();
             game.paused = false;
         });
-        game.deathScreen.button.scale.setTo(2,2);
+        game.pauseScreen.button.scale.setTo(2,2);
+    },
+
+    renderTipScreen: function(game, text, callback){
+        game.paused = true;
+
+        game.tipScreen.text = game.add.text(game.camera.width/2, 500, text,
+            {fill: '#53BBBC', align: 'center'});
+        game.tipScreen.text.font = 'Arial Black';
+        game.tipScreen.text.fontSize = 50;
+        game.tipScreen.text.fontWeight = 'bold';
+        game.tipScreen.text.anchor.set(0.5);
+
+        game.input.onDown.addOnce(function(){
+            game.tipScreen.text.destroy();
+            game.paused = false;
+            if (callback)
+                callback();
+        });
     },
 
     renderHUD: function(game){
@@ -259,7 +276,32 @@ PhaserQuest.Game.prototype = {
 
         //  Then let's go back to the main menu.
         this.state.start('MainMenu');
-
     }
-
 };
+
+
+
+// LEVELS
+
+PhaserQuest.level1 = new PhaserQuest.Game('level1');
+
+PhaserQuest.level1.createCall = function(){
+
+    this.addObstacle(400,700, 'obstacleBeam', 2);
+    this.addObstacle(600, 250, 'obstacleBeam', 1);
+    this.addObstacle(600, 700, 'obstacleBeam', 1);
+    this.addObstacle(800,600, 'obstacleBeam', 1);
+    this.addObstacle(900, 500, 'obstacleBeam', 2);
+    this.addObstacle(1000, 300, 'obstacleBeam', 2);
+
+    this.renderTipScreen(this, 'Welcome!');
+}
+
+PhaserQuest.level1.updateCall = function(){
+    this.moveObstacle(this.obstacles.getAt(0), 200, 200);
+    this.moveObstacle(this.obstacles.getAt(1), -100, 200);
+    this.moveObstacle(this.obstacles.getAt(2), -100, 200);
+    this.moveObstacle(this.obstacles.getAt(3), 200, 200);
+    this.moveObstacle(this.obstacles.getAt(4), 100, 200);
+    this.moveObstacle(this.obstacles.getAt(5), -100, 200);
+}

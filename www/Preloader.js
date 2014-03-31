@@ -31,7 +31,7 @@ PhaserQuest.Preloader.prototype = {
         //  + lots of other required assets here
         this.load.spritesheet('player', 'assets/sprites/player.png', 72.5, 94, 21);
         this.load.tilemap('level1', 'assets/tiles/level1.json', null, Phaser.Tilemap.TILED_JSON);
-        this.load.image('baseTiles', 'assets/tiles/level1.png');
+        this.load.image('level1', 'assets/tiles/level1.png');
         this.load.image('obstacleBeam', 'assets/sprites/obstacleBeam.png');
         this.load.image('okayButton', 'assets/sprites/okayButton.png');
         this.load.image('heartFull', 'assets/sprites/heartFull.png');
