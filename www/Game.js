@@ -334,7 +334,7 @@ PhaserQuest.level1.createCall = function(){
         'try not to float off into space!', function(){
 
             game.time.events.add(Phaser.Timer.SECOND * 3, function(){
-                        game.renderTipScreen(game, "Try holding down click to accelerate"+
+                        game.renderTipScreen(game, "Try holding down click to accelerate "+
                             "continuously.\n"+
                             "but don't go too fast!\n"+
                             "In space, there is no air slowing you down!", function(){
@@ -368,9 +368,21 @@ PhaserQuest.level1.updateCall = function(){
 PhaserQuest.level2 = new PhaserQuest.Game('level2');
 
 PhaserQuest.level2.createCall = function(){
+    this.showObsTip = false;
+    this.renderGoal(1100,100);
+    this.renderTipScreen(this, "That's a lot of walls!\n" +
+        "Can you make it to the end?\n Good luck!");
+    this.addObstacle(1250,150, 'obstacleBeam', 1);
 
 }
 
 PhaserQuest.level2.updateCall = function(){
-
+    this.moveObstacle(this.obstacles.getAt(0), 75, 100);
+    if (this.player.x - this.obstacles.getAt(0).x >0
+        && this.player.x - this.obstacles.getAt(0).x < 500
+        && Math.abs(this.player.y - this.obstacles.getAt(0).y) < 100
+        && this.showObsTip === false){
+        this.renderTipScreen(this, "That looks dangerous. \n You might lose life if you touch it!");
+        this.showObsTip = true;
+    }
 }
